@@ -1,1 +1,363 @@
-# test
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Квест для вивчення інформатики</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+        main {
+            flex-grow: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+        .question {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+        .question h2 {
+            margin: 0 0 0.5rem;
+        }
+        .answers {
+            list-style-type: none;
+            padding: 0;
+        }
+        .answers li {
+            margin-bottom: 0.5rem;
+        }
+        button {
+            width: 100%;
+            max-width: 400px;
+            height: 100px;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            cursor: pointer;
+            border-radius: 25px;
+            margin: 0.2rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        button.green {
+            background-color: limegreen;
+        }
+        button.yellow {
+            background-color:gold;
+        }
+        button.blue {
+            background-color: royalblue;
+        }
+        button.red {
+            background-color: orangered;
+        }
+        button:hover {
+            opacity: 0.8;
+            transform: scale(1.1);
+        }
+        button:active {
+            transform: scale(0.95);
+        }
+        #result {
+            margin-top: 2rem;
+            padding: 1rem;
+            background-color: #e7f9e7;
+            border: 1px solid #4CAF50;
+            border-radius: 5px;
+            display: none;
+        }
+        #feedback {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            text-align: center;
+            z-index: 1000;
+            display: none;
+        }
+        #feedback.correct {
+            background-color: rgba(76, 174, 79, 0.800);
+            color: white;
+        }
+        #feedback.wrong {
+            background-color: rgba(253, 73, 18, 0.801);
+            color: white;
+        }
+        .summary {
+            margin-top: 1rem;
+        }
+        .summary h3 {
+            margin: 0.5rem 0;
+        }
+        .answer-option {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            margin: 0.5rem;
+            border-radius: 10px;
+            font-weight: bold;
+            position: relative;
+        }
+        .answer-option.correct {
+            background-color: #4CAF50;
+        }
+        .answer-option.wrong {
+            background-color: #F44336;
+        }
+        .answer-option.checked {
+            border: 4px solid rgb(54, 54, 54);
+        }
+        .restart-button {
+            background-color: #2196F3;
+            margin-top: 1rem;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Квест для вивчення інформатики</h1>
+        <p>Пройдіть завдання і дізнайтеся, наскільки добре ви знаєте інформатику!</p>
+    </header>
+    <main>
+        <div id="questions-container"></div>
+        <div id="feedback"></div>
+        <div id="result"></div>
+        <button id="restart-button" class="restart-button" style="display: none;" onclick="restartQuiz()">Перезапустити тест</button>
+    </main>
+
+    <script>
+        const questions = [
+            {
+                text: "Який пристрій є 'мозком' комп'ютера?",
+                options: ["Клавіатура", "Монітор", "Процесор", "Миша"],
+                correct: 2
+            },
+            {
+                text: "Що таке алгоритм?",
+                options: [
+                    "Послідовність дій для вирішення задачі",
+                    "Комп'ютерна програма",
+                    "Тип даних",
+                    "Операційна система"
+                ],
+                correct: 0
+            },
+            {
+                text: "Що таке операційна система?",
+                options: [
+                    "Програмне забезпечення для управління комп'ютером",
+                    "Мікропроцесор",
+                    "Пристрій для зберігання даних",
+                    "Графічний редактор"
+                ],
+                correct: 0
+            },
+            {
+                text: "Яка основна функція операційної системи?",
+                options: [
+                    "Відображення графіки",
+                    "Управління ресурсами комп'ютера",
+                    "Зберігання даних",
+                    "Перевірка на віруси"
+                ],
+                correct: 1
+            },
+            {
+                text: "Що таке хмарні технології?",
+                options: [
+                    "Система зберігання даних на локальних серверах",
+                    "Мережа для обміну файлами між користувачами",
+                    "Інтернет-сервіси для зберігання та обробки даних",
+                    "Тип відеопам'яті для комп'ютерів"
+                ],
+                correct: 2
+            },
+            {
+                text: "Який пристрій використовується для введення даних?",
+                options: ["Клавіатура", "Принтер", "Мікрофон", "Графічний планшет"],
+                correct: 0
+            },
+            {
+                text: "Що таке IP-адреса?",
+                options: [
+                    "Локальний адрес електронної пошти",
+                    "Унікальний номер в інтернеті",
+                    "Код програми",
+                    "Протокол передачі файлів"
+                ],
+                correct: 1
+            },
+            {
+                text: "Який протокол використовується для передачі гіпертексту?",
+                options: ["HTTP", "SMTP", "FTP", "SSH"],
+                correct: 0
+            },
+            {
+                text: "Який пристрій використовується для зберігання даних?",
+                options: ["Клавіатура", "Жорсткий диск", "Монітор", "Миша"],
+                correct: 1
+            },
+            {
+                text: "Що таке багатозадачність?",
+                options: [
+                    "Виконання декількох програм одночасно",
+                    "Обмін даними між програмами",
+                    "Обслуговування кількох користувачів",
+                    "Паралельна робота комп'ютерів"
+                ],
+                correct: 0
+            },
+            {
+                text: "Що таке кеш-пам'ять?",
+                options: [
+                    "Основна пам'ять комп'ютера",
+                    "Швидка пам'ять для тимчасового зберігання даних",
+                    "Пристрій для передачі даних",
+                    "Тип відеопам'яті"
+                ],
+                correct: 1
+            },
+            {
+                text: "Яка основна функція браузера?",
+                options: [
+                    "Завантаження файлів",
+                    "Перегляд веб-сторінок",
+                    "Сканування вірусів",
+                    "Редагування документів"
+                ],
+                correct: 1
+            }
+        ];
+
+        let correctAnswers = 0;
+        let answersSummary = [];
+        let currentQuestionIndex = 0;
+
+        function renderQuestion() {
+            const container = document.getElementById("questions-container");
+            container.innerHTML = "";
+
+            if (currentQuestionIndex < questions.length) {
+                const question = questions[currentQuestionIndex];
+                const questionElem = document.createElement("div");
+                questionElem.className = "question";
+
+                const questionTitle = document.createElement("h2");
+                questionTitle.textContent = `${currentQuestionIndex + 1}. ${question.text}`;
+
+                const answersList = document.createElement("ul");
+                answersList.className = "answers";
+
+                question.options.forEach((option, index) => {
+                    const answerItem = document.createElement("li");
+                    const answerButton = document.createElement("button");
+
+                    const buttonColors = ["green", "yellow", "blue", "red"];
+                    answerButton.classList.add(buttonColors[index]);
+
+                    answerButton.textContent = option;
+                    answerButton.onclick = () => checkAnswer(index, answerButton);
+                    answerItem.appendChild(answerButton);
+                    answersList.appendChild(answerItem);
+                });
+
+                questionElem.appendChild(questionTitle);
+                questionElem.appendChild(answersList);
+                container.appendChild(questionElem);
+            } else {
+                showResult();
+            }
+        }
+
+        function checkAnswer(selectedIndex, selectedButton) {
+            const feedback = document.getElementById('feedback');
+            const question = questions[currentQuestionIndex];
+            const isCorrect = selectedIndex === question.correct;
+
+            feedback.style.display = 'flex';
+            feedback.textContent = isCorrect ? 'Правильна відповідь!' : 'Неправильна відповідь!';
+            feedback.className = isCorrect ? 'correct' : 'wrong';
+
+            selectedButton.classList.add('checked');
+
+            setTimeout(() => {
+                feedback.style.display = 'none';
+                answersSummary.push({
+                    question: currentQuestionIndex + 1,
+                    correct: question.correct,
+                    selected: selectedIndex,
+                    options: question.options
+                });
+                if (isCorrect) {
+                    correctAnswers++;
+                }
+                currentQuestionIndex++;
+                if (currentQuestionIndex < questions.length) {
+                    renderQuestion();
+                } else {
+                    showResult();
+                }
+            }, 700);
+        }
+
+        function showResult() {
+            const container = document.getElementById('questions-container');
+            const result = document.getElementById('result');
+            const restartButton = document.getElementById('restart-button');
+
+            container.innerHTML = '';
+
+            result.style.display = 'block';
+            let summaryHTML = `<h2>Ваш результат:</h2><h3><p>Ви відповіли правильно на ${correctAnswers} із ${questions.length} питань!</p></h3>`;
+
+            answersSummary.forEach(item => {
+                summaryHTML += `<div class="summary"><h3>Питання ${item.question}</h3>`;
+                item.options.forEach((option, index) => {
+                    const isCorrect = index === item.correct;
+                    const isChecked = index === item.selected;
+                    const className = isCorrect ? 'correct' : 'wrong';
+                    summaryHTML += `<div class="answer-option ${className} ${isChecked ? 'checked' : ''}">${option}</div>`;
+                });
+                summaryHTML += `</div>`;
+            });
+
+            result.innerHTML = summaryHTML;
+            restartButton.style.display = 'inline-block';
+        }
+
+        function restartQuiz() {
+            correctAnswers = 0;
+            answersSummary = [];
+            currentQuestionIndex = 0;
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('restart-button').style.display = 'none';
+            renderQuestion();
+        }
+
+        renderQuestion();
+    </script>
+</body>
+</html>
